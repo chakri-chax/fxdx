@@ -22,7 +22,7 @@ contract OTC{
     }
     mapping(uint256=>TxHistory) public TxHistoryList;
 
-    function depost(uint256 _amt) public  payable {
+    function deposit(uint256 _amt) public  payable {
         require(_amt >0 && _amt == msg.value,"ETH Amount Error");
         deposits[msg.sender]+= _amt;
         isWhitelisted[msg.sender] = true;
@@ -33,13 +33,15 @@ contract OTC{
     }
 
     function whitelistAddr(address _addr) external  {
-        require(deposits[msg.sender]>0,"OTC : You dont have enough finds");
+        require(deposits[msg.sender]>0,"OTC : You dont have enough funds");
         isWhitelisted[_addr] = true;
         emit Whitelisted(msg.sender, _addr);
     }
-    function Withdraw(uint256 _amt,address _to ) external {
-        require(isWhitelisted[msg.sender]== true, "Not Whitlisted");
-        deposits[_to]-= _amt;
+    function Withdraw(uint256 _amt,address _to ,address _from) external {
+        require(isWhitelisted[msg.sender]== true, "Not Whitelisted");
+        require(deposits[_from]>0,"OTC : You dont have enough funds");
+        require(deposits[_from]>=_amt,"OTC : You dont have enough funds");
+        deposits[_from]-= _amt;
         TxHistoryList[txCount] = TxHistory(2,msg.sender,_to,_amt);
         txCount++;
         payable(_to).transfer(_amt);
